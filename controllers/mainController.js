@@ -4,11 +4,23 @@ const taskController = {
     createTask: async (req,res) => {
         const body = req.body
         try {
-            const task = await Task.create({title: body.title, action_time: body.action_time})
+            const task = await Task.create(
+                {
+                    title: body.title, 
+                    action_time: body.action_time,
+                    is_Finished: body.is_Finished
+                })
+
             let objective = await Objective.bulkCreate(body.objective_list)
             
+            // objective[i].task_id = task.id
+
             for(var i = 0; i<=objective.length-1; i++){
-                objective[i].task_id = task.id
+                let objectiveId = objective[i].id
+                await Objective.update(
+                    {task_id: task.id},
+                    {where: {id : objectiveId} }
+                )
             }
 
             if(!task || !objective){
@@ -26,7 +38,11 @@ const taskController = {
                 result: task, objective
             })
         } catch (error) {
-            res.status(500)
+            return res.status(500).json({
+                status: "Internal Server Error",
+                message: error.message,
+                result: {}
+            })
         }
     },
     getAllTasks: async(req,res) => {
@@ -60,25 +76,97 @@ const taskController = {
                 }
             }
 
-            
+            const task = await Task.findAll({
+                where: {
+                    ...search
+                }
+            })
+
+
 
         } catch (error) {
-            
+            return res.status(500).json({
+                status: "Internal Server Error",
+                message: error.message,
+                result: {}
+            })
+        }
+    }, getTask: async (req,res) =>{
+        const id = req.params.id
+        try {
+            const task = await Task.findOne({
+                where: {
+                    id
+                },
+                include: [
+                    {
+                        model: Objective,
+                        as: "objective",
+                    }
+                ]
+            })
+
+            if(!task){
+                return res.status(404).json({
+                    status: "Not Found"
+                })
+            }
+
+            res.status(200).json({
+                result: task
+            })
+
+        } catch (error) {
+            return res.status(500).json({
+                status: "Internal Server Error",
+                message: error.message,
+                result: {}
+            })
+        }
+    },getObjective: async (req,res) =>{
+        const id = req.params.id
+        try {
+            const objective = await Objective.findOne({
+                where: {
+                    id
+                },
+                include: [
+                    {
+                        model: Task,
+                        as: "task",
+                    }
+                ]
+            })
+
+            if(!objective){
+                return res.status(404).json({
+                    status: "Not Found"
+                })
+            }
+
+            res.status(200).json({
+                result: objective
+            })
+
+        } catch (error) {
+            return res.status(500).json({
+                status: "Internal Server Error",
+                message: error.message,
+                result: {}
+            })
         }
     },
     deleteTask: async(req,res) => {
         const id = req.params.id
         try {
-            
-            
             const task = await Task.destroy({
                 where: {
                     id
                 }
             })
-            
+            console.log(task);
             if(!task){
-                res.status(404).json({
+                return res.status(404).json({
                     status: "Not Found",
                     message: "Task does not exist",
                     result: {}
@@ -90,7 +178,11 @@ const taskController = {
             })
 
         } catch (error) {
-            
+            return res.status(500).json({
+                status: "Internal Server Error",
+                message: error.message,
+                result: {}
+            })
         }
     }
 }

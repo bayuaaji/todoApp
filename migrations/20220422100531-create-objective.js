@@ -15,7 +15,13 @@ module.exports = {
         type: Sequelize.BOOLEAN
       },
       task_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: "Tasks",
+          key: "id"
+        },
+        onDelete: "cascade",
+        onUpdate: "cascade"
       },
       createdAt: {
         allowNull: false,

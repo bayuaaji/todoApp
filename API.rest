@@ -1,10 +1,17 @@
-POST http://localhost:4000/v1/task/create HTTP/1.1
+
+GET  http://localhost:9001/
+Content-Type: application/json
+
+
+###
+
+
+POST http://localhost:9001/api/v1/task/add
 Content-Type: application/json
 
 {
-    "title": "tes todo list",
+    "title": "tes todo liass",
     "action_time": 1234556,
-    "objective_list": [{"name": "mengelarkan tugas", "is_Finished": false}, {"name": "netfix", "is_Finished": true}],
-    "is_Finished": true,
-    "task_id": 1
+    "objective_list": [{"objective_Name": "mengelarkan tugas", "is_Finished": false}, {"objective_Name": "netfix", "is_Finished": true}],
+    "is_Finished": true
 }
